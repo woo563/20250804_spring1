@@ -11,4 +11,8 @@ public class MemberController {
   public void join() {
 
   }
+  @RequestMapping("/loginPrc")
+  public String login() {
+    return "loginPrc";
+  }
 }
