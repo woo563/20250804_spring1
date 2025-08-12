@@ -120,14 +120,16 @@ class MemoRepositoryTests {
     memoRepository.deleteMemoByMnoLessThan(10L);
   }
 
+
   @Test
   public void testGetListDesc() {
     List<Memo> result = memoRepository.getListDesc();
-    for (Memo m : result) System.out.println(m);
+    for(Memo m : result) System.out.println(m);
   }
 
   @Test
-  public void updateMemoText() {
+  public void testUpdateMemoText() {
     System.out.println(memoRepository.updateMemoText(10L, "Update ten"));
   }
+
 }
