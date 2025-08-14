@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+
+<th:block th:replace="~{layout/basic::setContent(~{this::content})}">
+
+    <th:block th:fragment="content">
+        <style>
+            .form-group {margin: 30px 0 30px 0;}
+        </style>
+
+        <h1 class="mt-4">Guestbook Register Page</h1>
+
+        <form th:action="@{/guestbook/register}" method="post">
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" name="title" id="title" class="form-control" placeholder="제목">
+            </div>
+            <div class="form-group">
+                <label>Content</label>
+                <textarea class="form-control" rows="5" name="content" placeholder="내용"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Writer</label>
+                <input type="text" class="form-control" name="writer" placeholder="작성자">
+            </div>
+
+            <button type="submit" class="btn btn-primary">등록</button>
+        </form>
+
+    </th:block>
+</th:block>
+</html>

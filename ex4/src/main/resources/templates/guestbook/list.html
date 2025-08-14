@@ -1,10 +1,62 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
 <th:block th:replace="~{layout/basic::setContent(~{this::content})}">
     <th:block th:fragment="content">
-        <h1 class="mt-4">Guestbook List Page</h1>
+        <h1 class="mt-4">Guestbook List Page
+            <a class="btn btn-outline-primary" th:href="@{/guestbook/register}">Register</a>
+        </h1>
         <p></p>
         <p></p>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Gno</th>
+                <th>Title</th>
+                <th>Writer</th>
+                <th>Register Date</th>
+                <th>Modified Date</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="guestbookDTO : ${pageResultDTO.dtoList}" style="cursor:pointer"
+                onmouseover="this.style.background='#aaaeb5'"
+                onmouseout="this.style.background='white'">
+                <td>[[${guestbookDTO.gno}]]</td>
+                <td>[[${guestbookDTO.title}]]</td>
+                <td>[[${guestbookDTO.writer}]]</td>
+                <td>[[${#temporals.format(guestbookDTO.regDate, 'yyyy/MM/dd HH:mm:ss')}]]</td>
+                <td>[[${#temporals.format(guestbookDTO.modDate, 'yyyy/MM/dd HH:mm:ss')}]]</td>
+            </tr>
+            </tbody>
+        </table>
+        <ul class="pagination h-100 justify-content-center align-items-center">
+            <li class="page-item" th:if="${pageResultDTO.prev}">
+                <a class="page-link" tabindex="-1"
+                   th:href="@{/guestbook/list(page=${pageResultDTO.start-1})}"
+                >Prev</a></li>
+
+            <li class="page-item" th:each="page : ${pageResultDTO.pageList}">
+                <a class="page-link" tabindex="-1"
+                   th:href="@{/guestbook/list(page=${page})}"
+                >[[${page}]]</a></li>
+
+            <li class="page-item" th:if="${pageResultDTO.next}">
+                <a class="page-link"
+                   th:href="@{/guestbook/list(page=${pageResultDTO.end+1})}"
+                >Next</a></li>
+        </ul>
+        <script th:inline="javascript">
+                                    let msg = [[${msg}]];
+                                    if(msg) {
+                                        alert(msg + "번 글이 등록되었습니다.");
+                                    }
+<!--                                    window.onload = () => {-->
+<!--                    let msg = [[${msg}]]-->
+<!--                    if(msg) alert(msg);-->
+<!--                  }-->
+
+        </script>
     </th:block>
 </th:block>
 </html>
