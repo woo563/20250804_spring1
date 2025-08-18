@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{layout/basic::setContent(~{this::content})}">
+    <th:block th:fragment="content">
+        <!-- 1. 페이지 제목(h1)을 "Modify Page"로 수정 -->
+        <h1 class="mt-4">Guestbook Modify Page</h1>
+
+        <form th:action="@{/guestbook/modify}" method="post">
+
+            <!-- 목록으로 돌아갈 때 필요한 페이지 정보 (이전과 동일) -->
+            <input type="hidden" name="page" th:value="${pageRequestDTO.page}">
+            <input type="hidden" name="type" th:value="${pageRequestDTO.type}">
+            <input type="hidden" name="keyword" th:value="${pageRequestDTO.keyword}">
+
+            <div class="form-group">
+                <label>Gno</label>
+                <!-- gno는 PK이므로 절대 수정 불가! (readonly 유지) -->
+                <input type="text" class="form-control" name="gno" th:value="${guestbookDTO.gno}" readonly>
+            </div>
+
+            <div class="form-group">
+                <label>Title</label>
+                <!-- title은 수정 가능해야 하므로 readonly 없음 (정상) -->
+                <input type="text" class="form-control" name="title" th:value="${guestbookDTO.title}">
+            </div>
+
+            <div class="form-group">
+                <label>Content</label>
+                <!-- 2. 사용 편의성을 위해 input 대신 textarea로 변경 -->
+                <textarea class="form-control" rows="5" name="content">[[${guestbookDTO.content}]]</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Writer</label>
+                <!-- 3. 작성자는 수정 불가! readonly 추가 -->
+                <input type="text" class="form-control" name="writer" th:value="${guestbookDTO.writer}" readonly>
+            </div>
+
+            <div class="form-group">
+                <label>Register Date</label>
+                <input type="text" class="form-control" th:value="${#temporals.format(guestbookDTO.regDate, 'yyyy/MM/dd HH:mm')}" readonly>
+            </div>
+
+            <div class="form-group">
+                <label>Modified Date</label>
+                <!-- 4. 수정일은 시스템이 관리하므로 수정 불가! readonly 추가 -->
+                <input type="text" class="form-control" th:value="${#temporals.format(guestbookDTO.modDate, 'yyyy/MM/dd HH:mm')}" readonly>
+            </div>
+
+            <!-- 5. 불필요한 버튼들 삭제하고, 필요한 버튼만 남김 -->
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a th:href="@{/guestbook/list(page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}"
+               class="btn btn-info">Cancel</a>
+        </form>
+    </th:block>
+</th:block>
+</html>
