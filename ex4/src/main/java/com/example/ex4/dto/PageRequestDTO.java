@@ -11,33 +11,18 @@ import org.springframework.data.domain.Sort;
 @AllArgsConstructor
 @Data
 public class PageRequestDTO {
-
-  // 1. int -> Integer 로 변경 (가장 중요!)
-  private Integer page;
-  private Integer size;
+  private int page;
+  private int size;
   private String type;
   private String keyword;
 
+  // list 페이지를 처음 호출할 때 page, size 없음으로 기본생성자 실행
   public PageRequestDTO() {
-    this.page = 1;
-    this.size = 10;
+    page = 1;size = 10;
   }
 
-  // 2. getPage(), getSize() 메소드를 추가하여 null일 때 기본값을 반환하도록 수정
-  public int getPage() {
-    // page가 null이거나 0 이하면 1을 반환, 아니면 원래 page 값을 반환
-    return (this.page == null || this.page <= 0) ? 1 : this.page;
-  }
-
-  public int getSize() {
-    // size가 null이거나 비정상적인 값이면 10을 반환, 아니면 원래 size 값을 반환
-    return (this.size == null || this.size <= 0 || this.size > 100) ? 10 : this.size;
-  }
-
-
-  public Pageable getPageable(Sort sort) {
-    // getPage()를 호출하여 안전하게 값을 가져옴.
-    // 페이지 번호는 0부터 시작하므로 1을 빼줍니다.
-    return PageRequest.of(getPage() - 1, getSize(), sort);
+  // Pageable::repository에서 해당되는 Page<>목록을 들고오기 위한 보조 정보
+  public Pageable getPageable(Sort sort){
+    return PageRequest.of(page - 1, size, sort);
   }
 }

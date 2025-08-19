@@ -26,19 +26,23 @@ public class GuestbookServiceImpl implements GuestbookService {
   @Override
   public Long register(GuestbookDTO guestbookDTO) {
     return guestbookRepository.save(dtoToEntity(guestbookDTO)).getGno();
-
   }
 
   @Override
   public PageResultDTO<GuestbookDTO, Guestbook> getList(PageRequestDTO pageRequestDTO) {
     Pageable pageable = pageRequestDTO.getPageable(Sort.by("gno").descending());
-    //검색 조건 처리
-    BooleanBuilder booleanBuilder = getSearch(pageRequestDTO);
-    //queryDSL 적용
-    Page<Guestbook> page = guestbookRepository.findAll(booleanBuilder, pageable);
-    Function<Guestbook, GuestbookDTO> fn = guestbook -> entityToDto(guestbook);
-    return new PageResultDTO<>(page, fn);
 
+    // 검색 조건 처리
+    BooleanBuilder booleanBuilder = getSearch(pageRequestDTO);
+
+    // queryDSL 적용 :: findAll(검색조건, 페이지정보)->페이지목록
+    Page<Guestbook> page = guestbookRepository.findAll(booleanBuilder, pageable);
+
+    // repository에서 정보를 가져오면 entity라서 이걸 dto로 변환하는 함수
+    Function<Guestbook, GuestbookDTO> fn = guestbook -> entityToDto(guestbook);
+
+    // PageResultDTO(검색된 페이지 목록, 변환하기 위한 Function)
+    return new PageResultDTO<>(page, fn);
   }
 
   private BooleanBuilder getSearch(PageRequestDTO pageRequestDTO) {
@@ -46,49 +50,47 @@ public class GuestbookServiceImpl implements GuestbookService {
     String keyword = pageRequestDTO.getKeyword();
     QGuestbook qGuestbook = QGuestbook.guestbook;
     BooleanBuilder booleanBuilder = new BooleanBuilder();
-    BooleanExpression booleanExpression = qGuestbook.gno.gt(0);
-    booleanBuilder.and(booleanExpression);
+    BooleanExpression booleanExpression = qGuestbook.gno.gt(0l);
+    booleanBuilder.and(booleanExpression); //첫번째 조건 적용
     BooleanBuilder conditionBuilder = new BooleanBuilder();
 
-    //isEmpty 문자열의 길이가 0이면 true 아니면 false
-    if (type == null || type.trim().isEmpty()) return booleanBuilder; // 그대로 리턴
-    //.length() == 0랑 isEmpty()는 같은 말(버전의 차이)
-    //type.trim()으로 문자열의 앞뒤 공백을 제거한 후, 그 결과가 빈 문자열인지 확인
-    if (keyword == null || keyword.trim().length() == 0) return booleanBuilder; // 그대로 리턴
+    // 검색 조건이 없는 경우(검색조건이 전체보기일 경우, 첫페이지 포함)
+    if(type==null || type.trim().length() ==0) return booleanBuilder;
+    if(keyword==null || keyword.trim().length() ==0) return booleanBuilder;
 
-
-    if (type.contains("t")) conditionBuilder.or(qGuestbook.title.contains(keyword));
-    if (type.contains("c")) conditionBuilder.or(qGuestbook.content.contains(keyword));
-    if (type.contains("w")) conditionBuilder.or(qGuestbook.writer.contains(keyword));
+    // 검색 조건이 있는 경우
+    if(type.contains("t")) conditionBuilder.or(qGuestbook.title.contains(keyword));
+    if(type.contains("c")) conditionBuilder.or(qGuestbook.content.contains(keyword));
+    if(type.contains("w")) conditionBuilder.or(qGuestbook.writer.contains(keyword));
     booleanBuilder.and(conditionBuilder);
     return booleanBuilder;
   }
 
   @Override
-  public GuestbookDTO read(Long gno) {
-    // gno 를 이용해 데이터베이스에서 해당 게시물을 찾기
-    Optional<Guestbook> result = guestbookRepository.findById(gno);
-
-    // 결과가 존재하면 entityToDto로 변환해서 반환하고, 없으면 null을 반환.
-    return result.isPresent() ? entityToDto(result.get()) : null;
+  public GuestbookDTO read(Long gno, PageRequestDTO pageRequestDTO) {
+    Optional<Guestbook> result = guestbookRepository.findById((Long)gno);
+    if (result.isPresent()) {
+      return entityToDto(result.get());
+    }
+    return null;
+  }
+  @Override
+  public Long modify(GuestbookDTO guestbookDTO) {
+    Long result = null;
+    Optional<Guestbook> find = guestbookRepository.findById(guestbookDTO.getGno());
+    if (find.isPresent()) {
+      Guestbook guestbook = find.get();  //찾은것의 일부만 변경
+      guestbook.changeTitle(guestbookDTO.getTitle());
+      guestbook.changeContent(guestbookDTO.getContent());
+      guestbookRepository.save(guestbook);
+      result = guestbook.getGno();
+    }
+    return result;
   }
 
   @Override
-  public void modify(GuestbookDTO dto) {
-    // 1. 수정할 게시물의 gno를 이용해서, 데이터베이스에서 해당 엔티티를 찾아옵니다.
-    Optional<Guestbook> result = guestbookRepository.findById(dto.getGno());
-
-    // 2. 해당 게시물이 존재하는지 확인합니다.
-    if(result.isPresent()) {
-      // 3. 존재한다면, 엔티티 객체를 꺼냅니다.
-      Guestbook entity = result.get();
-
-      // 4. 엔티티의 제목과 내용만! DTO에 담겨온 새로운 값으로 변경합니다.
-      entity.changeTitle(dto.getTitle());
-      entity.changeContent(dto.getContent());
-
-      // 5. 변경된 내용을 데이터베이스에 저장(UPDATE)합니다.
-      guestbookRepository.save(entity);
-    }
+  public Long remove(GuestbookDTO guestbookDTO) {
+    guestbookRepository.deleteById(guestbookDTO.getGno());
+    return guestbookDTO.getGno();
   }
 }

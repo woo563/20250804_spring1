@@ -2,7 +2,6 @@ package com.example.ex4.controller;
 
 import com.example.ex4.dto.GuestbookDTO;
 import com.example.ex4.dto.PageRequestDTO;
-import com.example.ex4.dto.PageResultDTO;
 import com.example.ex4.service.GuestbookService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -21,56 +20,76 @@ public class GuestbookController {
   // has-a관계  :: interface
   private final GuestbookService guestbookService;
 
+  // 페이지의 목록 요청, PageRequestDTO:요청된 페이지의 정보를 가진 객체
   @GetMapping({"","/","list"})
   public String list(PageRequestDTO pageRequestDTO, Model model) {
     log.info("guestbook/list..." + pageRequestDTO);
     model.addAttribute("pageResultDTO", guestbookService.getList(pageRequestDTO));
     return "/guestbook/list";
   }
+
+  // 등록 페이지로 이동
   @GetMapping("/register")
   public void register(){}
+
+  // 실제 등록할 때
   @PostMapping("/register")
   public String registerPost(GuestbookDTO guestbookDTO, RedirectAttributes ra){
     Long result = guestbookService.register(guestbookDTO);
     log.info(">>"+result+" 번 글이 등록되었습니다.");
-    ra.addFlashAttribute("msg", result); // RedirectAttributes 일회성, 최종 view단까지 보냄
+    ra.addFlashAttribute("registerMsg", result); // RedirectAttributes 일회성, 최종 view단까지 보냄
     return "redirect:/guestbook/list";
   }
 
-  @GetMapping("/read")
+  // 상세보기페이지와 수정페이지 단순 이동
+  @GetMapping({"/read","/modify"})
   public void read(Long gno, PageRequestDTO pageRequestDTO, Model model){
-    log.info(">>gno" + gno);
-    log.info(">>pageRequestDTO" + pageRequestDTO);
-    GuestbookDTO guestbookDTO = guestbookService.read(gno);
+    log.info(">>gno:"+gno);
+    log.info(">>pageRequestDTO:"+pageRequestDTO);
+    GuestbookDTO guestbookDTO = guestbookService.read(gno, pageRequestDTO);
+    typeKeywordInit(pageRequestDTO);
     model.addAttribute("guestbookDTO", guestbookDTO);
-    model.addAttribute("pageRequestDTO", pageRequestDTO);
   }
 
-  @GetMapping("/modify")
-  public void modify(Long gno, PageRequestDTO pageRequestDTO, Model model) {
-    log.info("modify GET... gno: " + gno);
-    GuestbookDTO guestbookDTO = guestbookService.read(gno);
-    model.addAttribute("guestbookDTO", guestbookDTO);
-    model.addAttribute("pageRequestDTO", pageRequestDTO); // 목록으로 돌아갈 때를 위해 이것도 추가!
-  }
-
+  // 실제 수정할 때
   @PostMapping("/modify")
-  public String modifyPost(GuestbookDTO dto, PageRequestDTO pageRequestDTO, RedirectAttributes redirectAttributes) {
-    log.info("modify POST........................" + dto);
-
-    // 1. 서비스 계층을 호출하여 실제 수정을 처리합니다.
-    guestbookService.modify(dto);
-
-    // 2. RedirectAttributes에 페이지 정보를 추가하여 리다이렉트 후에도 유지되도록 합니다.
-    redirectAttributes.addAttribute("page", pageRequestDTO.getPage());
-    redirectAttributes.addAttribute("type", pageRequestDTO.getType());
-    redirectAttributes.addAttribute("keyword", pageRequestDTO.getKeyword());
-
-    // 3. 수정된 글을 바로 확인할 수 있도록, 해당 글의 gno를 추가합니다.
-    redirectAttributes.addAttribute("gno", dto.getGno());
-
-    // 4. 수정이 완료되면, 수정한 글의 조회 페이지로 리다이렉트합니다.
-    return "redirect:/guestbook/read";
+  public String modify(GuestbookDTO guestbookDTO,
+                       PageRequestDTO pageRequestDTO, RedirectAttributes ra) {
+    Long gno = guestbookService.modify(guestbookDTO);
+    typeKeywordInit(pageRequestDTO);
+    ra.addFlashAttribute("msg", gno);
+    ra.addAttribute("gno", gno);
+    ra.addAttribute("page", pageRequestDTO.getPage());
+    ra.addAttribute("type", pageRequestDTO.getType());
+    ra.addAttribute("keyword", pageRequestDTO.getKeyword());
+    return "redirect:/guestbook/read";  // 수정후 상세보기페이지로 이동
   }
 
+  // 실제 삭제할 때(삭제 페이지 이동은 없음)
+  @PostMapping("/remove")
+  public String remove(GuestbookDTO guestbookDTO,
+                       PageRequestDTO pageRequestDTO, RedirectAttributes ra) {
+    // 실제 삭제처리
+    Long gno = guestbookService.remove(guestbookDTO);
+
+    // 지우는 페이지에 목록 개수가 하나일 때 다음페이지로 보냄
+    // 목록 가져와서 좋은 코드 아님. 페이지 목록 개수는 pageRequestDTO에 별도 저장 필요
+    if (guestbookService.getList(pageRequestDTO).getDtoList().size() == 0
+        && pageRequestDTO.getPage() != 1) {
+      pageRequestDTO.setPage(pageRequestDTO.getPage() - 1);
+    }
+
+    typeKeywordInit(pageRequestDTO);  //null 문자열을 삭제처리
+    ra.addFlashAttribute("removeMsg", gno); //일회성
+    ra.addAttribute("page", pageRequestDTO.getPage());
+    ra.addAttribute("type", pageRequestDTO.getType());
+    ra.addAttribute("keyword", pageRequestDTO.getKeyword());
+    return "redirect:/guestbook/list";
+  }
+
+  // type, keyword에 null 값이 문자열로 올 때 그것을 지울때
+  private void typeKeywordInit(PageRequestDTO pageRequestDTO){
+    if (pageRequestDTO.getType().equals("null")) pageRequestDTO.setType("");
+    if (pageRequestDTO.getKeyword().equals("null")) pageRequestDTO.setKeyword("");
+  }
 }
