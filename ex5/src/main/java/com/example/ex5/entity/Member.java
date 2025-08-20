@@ -17,4 +17,5 @@ public class Member extends BasicEntity {
   private String name;
 
 
+
 }

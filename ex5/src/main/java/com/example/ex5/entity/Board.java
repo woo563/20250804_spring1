@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @Getter
 @ToString(exclude = "writer")
-public class Board extends BasicEntity{
+public class Board extends BasicEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long bno;
@@ -17,4 +17,15 @@ public class Board extends BasicEntity{
   private String content;
   @ManyToOne(fetch = FetchType.LAZY)
   private Member writer;
+
+  public void changeTitle(String title) {
+    this.title = title;
+  }
+
+  public void changeContent(String content) {
+    this.content = content;
+  }
+  public void setWriter(Member writer) {
+    this.writer = writer;
+  }
 }

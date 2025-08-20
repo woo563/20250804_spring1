@@ -2,10 +2,10 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="~{layout/basic::setContent(~{this::content})}">
     <th:block th:fragment="content">
-        <h1 class="mt-4">Guestbook List Page
-            <a class="btn btn-outline-primary" th:href="@{/guestbook/register}">Register</a>
+        <h1 class="mt-4">Board List Page
+            <a class="btn btn-outline-primary" th:href="@{/board/register}">Register</a>
         </h1>
-        <form th:action="@{/guestbook/list}" method="get" id="frmSrch">
+        <form th:action="@{/board/list}" method="get" id="frmSrch">
             <div class="input-group">
                 <div class="input-group-prepend" style="margin-right: 10px;">
                     <select id="type" name="type" class="form-control">
@@ -27,7 +27,7 @@
         <table class="table table-striped">
             <thead>
             <tr>
-                <th>Gno</th>
+                <th>Bno</th>
                 <th>Title</th>
                 <th>Writer</th>
                 <th>Register Date</th>
@@ -35,34 +35,34 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="guestbookDto : ${pageResultDTO.dtoList}" style="cursor:pointer"
+            <tr th:each="boardDto : ${pageResultDTO.dtoList}" style="cursor:pointer"
                 onmouseover="this.style.background='#dbdbdb'"
                 onmouseout="this.style.background='white'"
-                th:onclick="goRead([[${guestbookDto.gno}]],[[${pageResultDTO.page}]],
+                th:onclick="goRead([[${boardDto.bno}]],[[${pageResultDTO.page}]],
           [[${pageRequestDTO.type}]],[[${pageRequestDTO.keyword}]])">
-                <td>[[${guestbookDto.gno}]]</td>
-                <td>[[${guestbookDto.title}]]</td>
-                <td>[[${guestbookDto.writer}]]</td>
-                <td>[[${#temporals.format(guestbookDto.regDate, 'yyyy/MM/dd hh:mm')}]]</td>
-                <td>[[${#temporals.format(guestbookDto.modDate, 'yyyy/MM/dd hh:mm')}]]</td>
+                <td>[[${boardDto.bno}]]</td>
+                <td>[[${boardDto.title}]]</td>
+                <td>[[${boardDto.writerName}]]</td>
+                <td>[[${#temporals.format(boardDto.regDate, 'yyyy/MM/dd hh:mm')}]]</td>
+                <td>[[${#temporals.format(boardDto.modDate, 'yyyy/MM/dd hh:mm')}]]</td>
             </tr>
             </tbody>
         </table>
         <ul class="pagination h-100 justify-content-center align-items-center">
             <li class="page-item" th:if="${pageResultDTO.prev}">
                 <a class="page-link" tabindex="-1"
-                   th:href="@{/guestbook/list(page=${pageResultDTO.start-1},type=${pageRequestDTO.type}
+                   th:href="@{/board/list(page=${pageResultDTO.start-1},type=${pageRequestDTO.type}
            ,keyword=${pageRequestDTO.keyword})}"
                 >Prev</a></li>
             <li th:class=" 'page-item ' + ${pageResultDTO.page==page?'active':''} "
                 th:each="page: ${pageResultDTO.pageList}">
                 <a class="page-link" tabindex="-1"
-                   th:href="@{/guestbook/list(page=${page},type=${pageRequestDTO.type}
+                   th:href="@{/board/list(page=${page},type=${pageRequestDTO.type}
            ,keyword=${pageRequestDTO.keyword})}"
                 >[[${page}]]</a></li>
             <li class="page-item" th:if="${pageResultDTO.next}">
                 <a class="page-link"
-                   th:href="@{/guestbook/list(page=${pageResultDTO.end+1},type=${pageRequestDTO.type}
+                   th:href="@{/board/list(page=${pageResultDTO.end+1},type=${pageRequestDTO.type}
            ,keyword=${pageRequestDTO.keyword})}"
                 >Next</a></li>
         </ul>
@@ -142,9 +142,9 @@
                frmSrch.submit();
              }
            }
-           function goRead(gno, page, type, keyword){
-             let url = /*[[@{/guestbook/read}]]*/'url'
-             location.href=url + `?gno=${gno}&page=${page}&type=${type}&keyword=${keyword}`
+           function goRead(bno, page, type, keyword){
+             let url = /*[[@{/board/read}]]*/'url'
+             location.href=url + `?bno=${bno}&page=${page}&type=${type}&keyword=${keyword}`
            }
         </script>
 

@@ -7,39 +7,39 @@
                 margin: 30px 0 30px 0;
             }
         </style>
-        <h1 class="mt-4">Guestbook Read Page</h1>
+        <h1 class="mt-4">Board Read Page</h1>
         <div class="form-group">
-            <label for="gno">Gno</label>
-            <input type="text" name="gno" id="gno" class="form-control" th:value="${guestbookDTO.gno}" readonly />
+            <label for="bno">Gno</label>
+            <input type="text" name="bno" id="bno" class="form-control" th:value="${boardDTO.bno}" readonly />
         </div>
         <div class="form-group">
             <label for="title">Title</label>
-            <input type="text" name="title" id="title" class="form-control" th:value="${guestbookDTO.title}" readonly />
+            <input type="text" name="title" id="title" class="form-control" th:value="${boardDTO.title}" readonly />
         </div>
         <div class="form-group">
             <label for="content">Content</label>
-            <input type="text" name="content" id="content" class="form-control" th:value="${guestbookDTO.content}"
+            <input type="text" name="content" id="content" class="form-control" th:value="${boardDTO.content}"
                    readonly>
         </div>
         <div class="form-group">
             <label for="writer">Writer</label>
-            <input type="text" name="writer" id="writer" class="form-control" th:value="${guestbookDTO.writer}"
+            <input type="text" name="writer" id="writer" class="form-control" th:value="${boardDTO.writerName}"
                    readonly>
         </div>
         <div class="form-group">
             <label for="title">Register Date</label>
             <input type="text" class="form-control"
-                   th:value="${#temporals.format(guestbookDTO.regDate, 'yyyy/MM/dd hh:mm:ss')}" readonly>
+                   th:value="${#temporals.format(boardDTO.regDate, 'yyyy/MM/dd hh:mm:ss')}" readonly>
         </div>
         <div class="form-group">
             <label for="title">Modified Date</label>
             <input type="text" class="form-control"
-                   th:value="${#temporals.format(guestbookDTO.modDate, 'yyyy/MM/dd hh:mm:ss')}" readonly>
+                   th:value="${#temporals.format(boardDTO.modDate, 'yyyy/MM/dd hh:mm:ss')}" readonly>
         </div>
         <div class="form-group">
-            <a th:href="@{/guestbook/modify(gno=${guestbookDTO.gno},page=${pageRequestDTO.page}
+            <a th:href="@{/board/modify(bno=${boardDTO.bno},page=${pageRequestDTO.page}
                 ,type=${pageRequestDTO.type},keyword=${pageRequestDTO.keyword})}" class="btn btn-primary">Modify</a>
-            <a th:href="@{/guestbook/list(page=${pageRequestDTO.page},type=${pageRequestDTO.type}
+            <a th:href="@{/board/list(page=${pageRequestDTO.page},type=${pageRequestDTO.type}
                 ,keyword=${pageRequestDTO.keyword})}" class="btn btn-info">List</a>
         </div>
         <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
