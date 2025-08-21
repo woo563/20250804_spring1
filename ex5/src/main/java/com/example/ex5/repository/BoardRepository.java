@@ -1,6 +1,7 @@
 package com.example.ex5.repository;
 
 import com.example.ex5.entity.Board;
+import com.example.ex5.repository.search.SearchBoardRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,7 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface BoardRepository extends JpaRepository<Board, Long> {
+public interface BoardRepository extends JpaRepository<Board, Long>
+    , SearchBoardRepository {
 
 //   JPQL  :: JPA(Java Persistence API)에서 사용하는 객체지향 쿼리 언어
 //   select b, r from Board b left join Reply r on r.board = b where b.bno=100;
@@ -43,5 +45,6 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
       "Left join Reply r on r.board = b " +
       "where b.bno = :bno")
   Object getBroadByBno(Long bno);
+
 
 }

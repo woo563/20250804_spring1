@@ -78,4 +78,10 @@ class BoardRepositoryTests {
     System.out.println(Arrays.toString(arr));
 
   }
+
+  @Test
+  public void testSearchtest() {
+    Board b = boardRepository.searchTest();
+    System.out.println(b);
+  }
 }
