@@ -46,16 +46,23 @@ public class BoardServiceImpl implements BoardService {
   @Override
   // PageResultDTO<DTO, EN> : EN으로 입력되면 DTO로 받는 구조
   public PageResultDTO<BoardDTO, Object[]> getList(PageRequestDTO pageRequestDTO) {
-    Page<Object[]> page = boardRepository
-        .getBoardWithReplyCount(pageRequestDTO.getPageable(Sort.by("bno")
-            .descending())
-        );
+//    Page<Object[]> page = boardRepository
+//        .getBoardWithReplyCount(pageRequestDTO.getPageable(Sort.by("bno")
+//            .descending())
+//        );
+    log.info("BoardService getList........" + pageRequestDTO);
     Function<Object[], BoardDTO> fn =
         (entity) -> entityToDto((Board) entity[0]
             , (Member) entity[1]
             , (Long) entity[2]);
 
-    return new PageResultDTO<>(page, fn);
+    Page<Object[]> result = boardRepository.searchPage(
+        pageRequestDTO.getType(),
+        pageRequestDTO.getKeyword(),
+        pageRequestDTO.getPageable(Sort.by("bno").descending())
+    );
+
+    return new PageResultDTO<>(result, fn);
   }
 
   @Override
