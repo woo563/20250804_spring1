@@ -18,38 +18,42 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequiredArgsConstructor
 public class BoardController {
   private final BoardService boardService;
+
   @GetMapping({"","/","list"})
   public String list(PageRequestDTO pageRequestDTO, Model model) {
     log.info("board/list..." + pageRequestDTO);
     model.addAttribute("pageResultDTO", boardService.getList(pageRequestDTO));
     return "/board/list";
   }
-
+  // 등록 페이지로 이동
   @GetMapping("/register")
-  public void register() {
-  }
+  public void register(){}
 
+  // 실제 등록할 때
   @PostMapping("/register")
   public String registerPost(BoardDTO boardDTO, RedirectAttributes ra) {
     Long result = boardService.register(boardDTO);
-    log.info(">>" + result + " 번 글이 등록되었습니다.");
-    ra.addFlashAttribute("registerMsg", result); // RedirectAttributes 일회성, 최종 view단까지 보냄
+    log.info(">>"+result+" 번 글이 등록되었습니다.");
+    ra.addFlashAttribute("msg", result + " 번 글이 등록되었습니다.");
     return "redirect:/board/list";
   }
 
-  @GetMapping({"/read", "/modify"})
-  public void read(Long bno, PageRequestDTO pageRequestDTO, Model model) {
-    log.info(">>bno:" + bno);
-    log.info(">>pageRequestDTO:" + pageRequestDTO);
-    model.addAttribute("boardDTO", boardService.get(bno, pageRequestDTO));
+  // 상세보기페이지와 수정페이지 단순 이동
+  @GetMapping({"/read","/modify"})
+  public void read(Long bno, PageRequestDTO pageRequestDTO, Model model){
+    BoardDTO boardDTO = boardService.read(bno, pageRequestDTO);
+    typeKeywordInit(pageRequestDTO);
+    model.addAttribute("boardDTO", boardDTO);
   }
 
+  // 실제 수정할 때
   @PostMapping("/modify")
   public String modify(BoardDTO boardDTO,
                        PageRequestDTO pageRequestDTO, RedirectAttributes ra) {
-    boardService.modify(boardDTO);
-    ra.addFlashAttribute("msg", boardDTO.getBno());
-    ra.addAttribute("bno", boardDTO.getBno());
+    Long bno = boardService.modify(boardDTO, pageRequestDTO);
+    typeKeywordInit(pageRequestDTO);
+    ra.addFlashAttribute("msg", bno);
+    ra.addAttribute("bno", bno);
     ra.addAttribute("page", pageRequestDTO.getPage());
     ra.addAttribute("type", pageRequestDTO.getType());
     ra.addAttribute("keyword", pageRequestDTO.getKeyword());
@@ -57,30 +61,24 @@ public class BoardController {
   }
 
   // 실제 삭제할 때(삭제 페이지 이동은 없음)
-  @PostMapping("/removeWithReplies")
-  public String remove(Long bno,
+  @PostMapping("/remove")
+  public String remove(BoardDTO boardDTO,
                        PageRequestDTO pageRequestDTO, RedirectAttributes ra) {
-    // 실제 삭제처리
-    boardService.removeWithReplies(bno);
-
-    // 지우는 페이지에 목록 개수가 하나일 때 다음페이지로 보냄
-    // 목록 가져와서 좋은 코드 아님. 페이지 목록 개수는 pageRequestDTO에 별도 저장 필요
+    boardService.removeWithReplies(boardDTO.getBno());
     if (boardService.getList(pageRequestDTO).getDtoList().size() == 0
         && pageRequestDTO.getPage() != 1) {
       pageRequestDTO.setPage(pageRequestDTO.getPage() - 1);
     }
-
     typeKeywordInit(pageRequestDTO);  //null 문자열을 삭제처리
-    ra.addFlashAttribute("removeMsg", bno); //일회성
+    ra.addFlashAttribute("msg", boardDTO.getBno()+" 번 글이 삭제되었습니다.");
     ra.addAttribute("page", pageRequestDTO.getPage());
     ra.addAttribute("type", pageRequestDTO.getType());
     ra.addAttribute("keyword", pageRequestDTO.getKeyword());
     return "redirect:/board/list";
-
   }
+
   private void typeKeywordInit(PageRequestDTO pageRequestDTO){
     if (pageRequestDTO.getType().equals("null")) pageRequestDTO.setType("");
     if (pageRequestDTO.getKeyword().equals("null")) pageRequestDTO.setKeyword("");
   }
-
 }

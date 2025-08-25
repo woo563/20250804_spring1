@@ -11,11 +11,10 @@ import lombok.*;
 @Getter
 @ToString
 public class Member extends BasicEntity {
+
   @Id
   private String email;
+
   private String password;
   private String name;
-
-
-
 }

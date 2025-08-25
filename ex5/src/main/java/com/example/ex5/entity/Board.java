@@ -15,17 +15,10 @@ public class Board extends BasicEntity {
   private Long bno;
   private String title;
   private String content;
+
   @ManyToOne(fetch = FetchType.LAZY)
   private Member writer;
 
-  public void changeTitle(String title) {
-    this.title = title;
-  }
-
-  public void changeContent(String content) {
-    this.content = content;
-  }
-  public void setWriter(Member writer) {
-    this.writer = writer;
-  }
+  public void changeTitle(String title) {this.title = title;}
+  public void changeContent(String content) {this.content=content;}
 }

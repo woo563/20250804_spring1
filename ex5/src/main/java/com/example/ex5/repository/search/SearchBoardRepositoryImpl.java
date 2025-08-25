@@ -19,87 +19,124 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+// ex4에서는 QuerydslPredicateExecutor를 활용했지만
+// ex5는 클래스에 상속을 이용하여 QuerydslRepositorySupport를 사용.
+// 목적 : Q 도메인을 활용한 동적검색을 할 수 있다.
 @Log4j2
-public class SearchBoardRepositoryImpl extends QuerydslRepositorySupport implements SearchBoardRepository {
+public class SearchBoardRepositoryImpl extends QuerydslRepositorySupport
+    implements SearchBoardRepository {
 
   public SearchBoardRepositoryImpl() {
     super(Board.class);
   }
 
-
-
   @Override
-  public Page<Object[]> searchPage(String type, String keyword, Pageable pageable) {
-    log.info("searchPage.............................");
+  public Board searchTest() {
+    log.info("search Test.......");
 
-    QBoard board = QBoard.board;
-    QReply reply = QReply.reply;
-    QMember member = QMember.member;
+//    QBoard qBoard = QBoard.board;
+//    JPQLQuery<Board> jpqlQuery = from(qBoard);
+//    jpqlQuery.select(qBoard).where(qBoard.bno.eq(50l));
+//    log.info(jpqlQuery);
+//    Board result = jpqlQuery.fetchOne();
 
-    // 1. 핵심 뼈대: JOIN과 SELECT, GROUP BY 설정 (searchTest에서 했던 내용)
-    JPQLQuery<Board> jpqlQuery = from(board);
-    jpqlQuery.leftJoin(member).on(board.writer.eq(member));
-    jpqlQuery.leftJoin(reply).on(reply.board.eq(board));
+    QBoard qBoard = QBoard.board;
+    QReply qReply = QReply.reply;
+    QMember qMember = QMember.member;
 
-    JPQLQuery<Tuple> tuple = jpqlQuery.select(board, member, reply.count());
-    tuple.groupBy(board);
+    JPQLQuery<Board> jpqlQuery = from(qBoard);
+    jpqlQuery.leftJoin(qMember).on(qBoard.writer.eq(qMember));
+    jpqlQuery.leftJoin(qReply).on(qReply.board.eq(qBoard));
 
-    // 2. 검색 조건 추가 (똑똑한 WHERE 기능의 심장!)
-    BooleanBuilder booleanBuilder = new BooleanBuilder();
-    BooleanExpression expression = board.bno.gt(0L); // bno가 0보다 크다는 기본 조건
-    booleanBuilder.and(expression);
+//    jpqlQuery.select(qBoard, qMember, qReply.count()).where(qBoard.bno.eq(50l));
+//    log.info(jpqlQuery);
+//    List<Board> result = jpqlQuery.fetch();
+//    log.info(">>>" + result);
 
-    // type과 keyword가 비어있지 않은 경우에만 검색 조건 생성
-    if (type != null && !type.trim().isEmpty() && keyword != null && !keyword.trim().isEmpty()) {
-      String[] typeArr = type.split(""); // "tcw" 같은 문자열을 "t", "c", "w"로 쪼갬
-      BooleanBuilder conditionBuilder = new BooleanBuilder();
-
-      for (String t : typeArr) {
-        switch (t) {
-          case "t":
-            conditionBuilder.or(board.title.contains(keyword));
-            break;
-          case "w":
-            conditionBuilder.or(member.name.contains(keyword)); // 작성자 이름으로 검색
-            break;
-          case "c":
-            conditionBuilder.or(board.content.contains(keyword));
-            break;
-        }
-      }
-      booleanBuilder.and(conditionBuilder);
-    }
-
-    tuple.where(booleanBuilder); // 완성된 검색 조건을 쿼리에 적용
-
-    // 3. 정렬 기능 추가
-    Sort sort = pageable.getSort();
-    sort.stream().forEach(order -> {
-      Order direction = order.isAscending() ? Order.ASC : Order.DESC;
-      String prop = order.getProperty(); // 정렬 기준 컬럼 이름 (예: "bno")
-
-      PathBuilder orderByExpression = new PathBuilder(Board.class, "board");
-      tuple.orderBy(new OrderSpecifier(direction, orderByExpression.get(prop)));
-    });
-
-    // 4. 페이징 처리
-    tuple.offset(pageable.getOffset()); // 몇 번째 데이터부터 가져올지
-    tuple.limit(pageable.getPageSize());  // 한 페이지에 몇 개를 가져올지
-
-    // 5. 쿼리 실행 및 결과 포장
+    JPQLQuery<Tuple> tuple = jpqlQuery.select(qBoard, qMember, qReply.count());
+    tuple.groupBy(qBoard);
+    log.info(tuple);
     List<Tuple> result = tuple.fetch();
     log.info(result);
 
-    long count = tuple.fetchCount(); // 검색 조건에 맞는 전체 데이터 개수
-    log.info("COUNT: " + count);
+    return null;
+  }
 
-    // Page<Object[]> 형태로 최종 결과를 만들어서 반환
-    return new PageImpl<Object[]>(
-        result.stream().map(t -> t.toArray()).collect(Collectors.toList()),
-        pageable,
-        count
-    );
+  // JPQLQuery를 이용하여 Page<Object[]> 생성 목적
+  @Override
+  public Page<Object[]> searchPage(String type, String keyword, Pageable pageable) {
+    log.info("Search Page....");
+
+    // 1) 도메인을 확보
+    QBoard qBoard = QBoard.board;
+    QReply qReply = QReply.reply;
+    QMember qMember = QMember.member;
+
+    // 2) 도메인을 조인
+    JPQLQuery<Board> jpqlQuery = from(qBoard);
+    jpqlQuery.leftJoin(qMember).on(qBoard.writer.eq(qMember));
+    jpqlQuery.leftJoin(qReply).on(qReply.board.eq(qBoard));
+
+    // 3) Tuple 생성:조인한 객체와 select를 활용해서 필요한 데이터를 tuple로 생성
+    JPQLQuery<Tuple> tuple = jpqlQuery.select(qBoard, qMember, qReply.count());
+
+    // 4) 조건절 검색을 위한 객체 생성
+    BooleanBuilder builder = new BooleanBuilder();
+    BooleanExpression expression = qBoard.bno.gt(0l); // 모든 데이터를 위한 조건지정
+    builder.and(expression); // 검색 기본 객체로 먼저 결합
+
+    // 5) 검색조건 추가
+    if (type != null) {
+      String[] typeArr = type.split(""); // ""의 의미는 한글자씩 분리함
+      BooleanBuilder conditionBuilder = new BooleanBuilder();
+      for (String t : typeArr) {
+        switch (t) { // 화살표연산자 활용시 break 생략가능, default 필히포함(java 14+)
+          case "t" -> conditionBuilder.or(qBoard.title.contains(keyword));
+          case "w" -> conditionBuilder.or(qMember.email.contains(keyword));
+          default -> conditionBuilder.or(qBoard.content.contains(keyword));
+        }
+      } // 반복문 돌면서 발생한 조건 누적
+      builder.and(conditionBuilder); //누적된 조건을 최초 조건과 합체
+    }
+
+    // 6) 조인된 tuple에 추가된 조건절 적용
+    tuple.where(builder);
+
+    // 7) 조인된 데이터의 select를 위한 group by 설정
+    tuple.groupBy(qBoard);
+
+    // 8) 정렬조건 생성
+    Sort sort = pageable.getSort();
+    sort.stream().forEach(order -> {
+      Order direction = order.isAscending() ? Order.ASC : Order.DESC;
+      // String prop = order.getProperty();
+      PathBuilder orderByExpression = new PathBuilder(Board.class, "board");
+      tuple.orderBy(new OrderSpecifier<Comparable>(direction, orderByExpression));
+    });
+
+    // 9) tuple의 데이터를 가져오기 위한 시작 위치 지정(offset 지정)
+    tuple.offset(pageable.getOffset());
+
+    // 10) tuple의 데이터를 가져올 때 개수 지정
+    tuple.limit(pageable.getPageSize());
+
+    // 11) 최종결과를 tuple의 fetch()를 통해서 컬렉션으로 변환
+    List<Tuple> result = tuple.fetch();
+
+    // 12) tuple의 검색 결과 개수
+    long count = tuple.fetchCount();
+    log.info("총 개수 출력"+count);
+
+    // 13) Page 객체를 PageImpl 객체로  변환
+    return new PageImpl<Object[]>(result.stream().map(new Function<Tuple, Object[]>() {
+      @Override
+      public Object[] apply(Tuple tuple) {
+        return tuple.toArray();
+      }
+    }).collect(Collectors.toList()), pageable, count);
   }
 }

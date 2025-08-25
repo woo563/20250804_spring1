@@ -23,8 +23,13 @@
                        th:value="${boardDTO.content}" />
             </div>
             <div class="form-group">
-                <label for="writer">Writer</label>
-                <input type="text" name="writer" id="writer" class="form-control" th:value="${boardDTO.writerName}"
+                <label for="writerName">WriterName</label>
+                <input type="text" name="writerName" id="writerName" class="form-control" th:value="${boardDTO.writerName}"
+                       readonly>
+            </div>
+            <div class="form-group">
+                <label for="writerEmail">WriterEmail</label>
+                <input type="text" name="writerEmail" id="writerEmail" class="form-control" th:value="${boardDTO.writerEmail}"
                        readonly>
             </div>
             <div class="form-group">
@@ -58,7 +63,7 @@
             }
             btnDelete.onclick = e => {
                 e.preventDefault();
-                frmModify.setAttribute('action', /*[[@{/board/removeWithReplies}]]*/'removeWithReplies')
+                frmModify.setAttribute('action', /*[[@{/board/remove}]]*/'remove')
                 frmModify.submit();
             }
             btnBack.onclick = e => {

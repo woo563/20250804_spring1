@@ -84,71 +84,57 @@
         </div>
         <script th:inline="javascript">
             window.onload = () => {
-             let registerMsg = [[${registerMsg}]];
-             let removeMsg = [[${removeMsg}]];
-
-             // 등록(registerMsg)가 도착했는지 확인합니다.
-             if(registerMsg) {
-               const myModal = new bootstrap.Modal(document.querySelector('#myModal'),{backdrop:true});
-               document.querySelector(".modal-title").innerHTML=`<p>알림</p>`
-               document.querySelector(".modal-body").textContent=`${registerMsg} 번 글이 등록되었습니다.`
-               myModal.show()
-               history.replaceState({}, null, null)
-             }
-
-             // 삭제(removeMsg)가 도착했는지 확인합니다.
-             if(removeMsg) {
-               const myModal = new bootstrap.Modal(document.querySelector('#myModal'),{backdrop:true});
-               document.querySelector(".modal-title").innerHTML=`<p>알림</p>`
-               document.querySelector(".modal-body").textContent=`${removeMsg} 번 글이 삭제되었습니다.`
-               myModal.show()
-               history.replaceState({}, null, null)
-             }
-
-             const frmSrch = document.querySelector('#frmSrch')
-             const btnSrch = document.querySelector('.btnSrch')
-             const type = document.querySelector('#type')
-             const keyword = document.querySelector('#keyword')
-
-             if(type.value == "") {
-               keyword.disabled=true;
-               btnSrch.disabled=true;
-             } else {
-               keyword.disabled=false;
-               btnSrch.disabled=false;
-             }
-
-             type.onchange = () => {
-               // '전체보기'를 선택하면 바로 깨끗한 목록 페이지로 이동합니다.
-               if (type.value === "") {
-                 let url = /*[[@{/board/list}]]*/'';
-                 location.href = url;
-               } else {
-                 keyword.disabled = false;
-                 btnSrch.disabled = false;
-                 keyword.focus();
-               }
-             }
-
-             btnSrch.onclick = (e) => {
-               e.preventDefault();
-               if(!type.options[0].selected){
-                 if(keyword.value == "") {
-                   keyword.setAttribute('placeholder', "검색어를 입력하세요")
-                   keyword.focus();
-                   return;
-                 }
-               }
-               frmSrch.submit();
-             }
-           }
-
-           function goRead(bno, page, type, keyword){
-             let url = /*[[@{/board/read}]]*/'url'
-             location.href=url + `?bno=${bno}&page=${page}&type=${type}&keyword=${keyword}`
-           }
+              let msg = [[${msg}]]
+              // msg의 내용이 있을 때만 모달창 띄워짐
+              if(msg) {
+                const myModal = new bootstrap.Modal(document.querySelector('#myModal'),{backdrop:true});
+                document.querySelector(".modal-title").innerHTML=`<p>알림</p>`
+                document.querySelector(".modal-body").textContent=[[${msg}]]
+                myModal.show()
+                history.replaceState({}, null, null) // 모달창 띄운 흔적을 history에서 제거
+              }
+              const frmSrch = document.querySelector('#frmSrch')
+              const btnSrch = document.querySelector('.btnSrch')
+              const type = document.querySelector('#type')
+              const keyword = document.querySelector('#keyword')
+              if(type.value == "") {
+                keyword.disabled=true;
+                btnSrch.disabled=true;
+              } else {
+                keyword.disabled=false;
+                btnSrch.disabled=false;
+              }
+              keyword.disabled=(type.value == "")?true:false;
+              btnSrch.disabled=(type.value == "")?true:false;
+              type.onchange = () => {
+                keyword.setAttribute('placeholder', "")
+                if(type.options[0].selected){
+                  keyword.value='';
+                  frmSrch.submit()
+                  keyword.disabled=true;
+                  btnSrch.disabled=true
+                } else {
+                  keyword.disabled=false;
+                  btnSrch.disabled=false;
+                }
+              }
+              btnSrch.onclick = (e) => {
+                e.preventDefault();
+                if(!type.options[0].selected){
+                  if(keyword.value == "") {
+                    keyword.setAttribute('placeholder', "검색어를 입력하세요")
+                    keyword.focus();
+                    return;
+                  }
+                }
+                frmSrch.submit();
+              }
+            }
+            function goRead(bno, page, type, keyword){
+              let url = /*[[@{/board/read}]]*/'url'
+              location.href=url + `?bno=${bno}&page=${page}&type=${type}&keyword=${keyword}`
+            }
         </script>
-
     </th:block>
 </th:block>
 </html>

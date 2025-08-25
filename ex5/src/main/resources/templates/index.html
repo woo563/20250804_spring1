@@ -1,17 +1,16 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Index</title>
 </head>
 <body>
-    <h1>Index</h1>
+<h1>Index</h1>
 <ul>
-    <li><a th:href="@{/board/list}">List</a></li>
+    <li><a th:href="@{/board/list}">Board</a></li>
 </ul>
 <script th:inline="javascript">
-    location.replace("http://localhost:8080/ex5/board");
-
+    location.replace("http://localhost:8080/ex5/board")
 </script>
 </body>
 </html>

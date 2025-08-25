@@ -11,8 +11,9 @@ import java.util.List;
 
 public interface BoardRepository extends JpaRepository<Board, Long>
     , SearchBoardRepository {
+// SearchBoardRepository:복수개의 엔티티를 검색하기 위해 별도의 interface 로 분리
 
-//   JPQL  :: JPA(Java Persistence API)에서 사용하는 객체지향 쿼리 언어
+//   JPQL  :: JPA(Java Persistence API)+SQL 에서 사용하는 객체지향 쿼리 언어
 //   select b, r from Board b left join Reply r on r.board = b where b.bno=100;
 
 //   SQL :: RDBMS에서 사용하는 구조화된 쿼리 언어
@@ -27,24 +28,18 @@ public interface BoardRepository extends JpaRepository<Board, Long>
   @Query("select b, r from Board b left join Reply r on r.board = b where b.bno=:bno ")
   List<Object[]> getBoardWithReply(Long bno);
 
-  // ex4에서는 page를 구할 때 findAll()을 활용해서 카운트를 구할 필요가 없었음
-  // 그러나, @Query를 사용해서 page를 구할 때 CountQuery에 대한 내용도 적시 해야 함.
-
-  // ex) 게시글 목록 페이지, 각 게시글의 b(게시글), w(작성자), cound(r)(댓글갯수) 가져오기
+  // ex4에서는 Page를 구할 때 findAll()를 활용해서 카운트를 구할 필요가 없었음.
+  // 그러나 @Query를 사용해서 Page를 구할 때는 countQuery에 대한 내용도 적시 해야 함.
   @Query(value = "select b, w, count(r) from Board b " +
       "left join b.writer w " +
-      "left join Reply r on r.board = b " +
+      "left join Reply r ON r.board = b " +
       "group by b "
       , countQuery = "select count(b) from Board b ")
   Page<Object[]> getBoardWithReplyCount(Pageable pageable);
 
-
-  // ex) 게시글 상세 보기 페이지
   @Query("select b, w, count(r) from Board b " +
-      "Left join b.writer w " +
-      "Left join Reply r on r.board = b " +
-      "where b.bno = :bno")
-  Object getBroadByBno(Long bno);
-
-
+      "left join b.writer w " +
+      "left join Reply r ON r.board = b " +
+      "where b.bno=:bno " )
+  Object getBoardByBno(Long bno);
 }
