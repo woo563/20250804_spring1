@@ -12,13 +12,13 @@ import java.util.List;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
-    // Review에서 Member가 LAZY로 되었지만 이메서드에서는 조인을 하겠다는 표시
-    @EntityGraph(attributePaths = {"member"}, type = EntityGraph.EntityGraphType.FETCH)
-    List<Review> findByMovie(Movie movie);
+  // Review에서 Member가 LAZY로 되었지만 이메서드에서는 조인을 하겠다는 표시
+  @EntityGraph(attributePaths = {"member"}, type = EntityGraph.EntityGraphType.FETCH)
+  List<Review> findByMovie(Movie movie);
 
-    // 쿼리메서드는 Review 개수만큼 delete 발생 쿼리@은 JPQL 조건절이용해서 한번에 처리
-    @Modifying
-    @Query("delete from Review r where r.member = :member ")
-    void deleteByMember(Member member);
+  // 쿼리메서드는 Review 개수만큼 delete 발생 쿼리@은 JPQL 조건절이용해서 한번에 처리
+  @Modifying
+  @Query("delete from Review r where r.member = :member ")
+  void deleteByMember(Member member);
 
 }

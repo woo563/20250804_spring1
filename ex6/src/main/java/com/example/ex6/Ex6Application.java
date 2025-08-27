@@ -8,9 +8,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @SpringBootApplication
 public class Ex6Application {
 
-	public static void main(String[] args) {
-		SpringApplication.run(Ex6Application.class, args);
+  public static void main(String[] args) {
+    SpringApplication.run(Ex6Application.class, args);
 		System.out.println("http://localhost:8080/ex6");
-	}
+  }
 
 }

@@ -10,37 +10,37 @@
         <div class="form-group">
             <label for="bno">Bno</label>
             <input type="text" name="bno" id="bno" class="form-control" readonly
-                   th:value="${boardDTO.bno}">
+                    th:value="${boardDTO.bno}">
         </div>
         <div class="form-group">
             <label for="title">Title</label>
             <input type="text" name="title" id="title" class="form-control"
-                   th:value="${boardDTO.title}" readonly>
+                    th:value="${boardDTO.title}" readonly>
         </div>
         <div class="form-group">
             <label for="content">Content</label>
             <input type="text" name="content" id="content" class="form-control"
-                   th:value="${boardDTO.content}" readonly>
+                    th:value="${boardDTO.content}" readonly>
         </div>
         <div class="form-group">
             <label for="writerName">WriterName</label>
             <input type="text" name="writerName" id="writerName" class="form-control"
-                   th:value="${boardDTO.writerName}" readonly>
+                    th:value="${boardDTO.writerName}" readonly>
         </div>
         <div class="form-group">
             <label for="writerEmail">WriterEmail</label>
             <input type="text" name="writerEmail" id="writerEmail" class="form-control"
-                   th:value="${boardDTO.writerEmail}" readonly>
+                    th:value="${boardDTO.writerEmail}" readonly>
         </div>
         <div class="form-group">
             <label for="regDate">Register Date</label>
             <input type="text" name="regDate" id="regDate" class="form-control" readonly
-                   th:value="${#temporals.format(boardDTO.regDate, 'yyyy/MM/dd hh:mm')}">
+                th:value="${#temporals.format(boardDTO.regDate, 'yyyy/MM/dd hh:mm')}">
         </div>
         <div class="form-group">
             <label for="modDate">Modified Date</label>
             <input type="text" name="modDate" id="modDate" class="form-control"readonly
-                   th:value="${#temporals.format(boardDTO.modDate, 'yyyy/MM/dd hh:mm')}">
+                th:value="${#temporals.format(boardDTO.modDate, 'yyyy/MM/dd hh:mm')}">
         </div>
         <div class="form-group">
             <a class="btn btn-primary" th:href="@{/board/modify(page=${pageRequestDTO.page},bno=${boardDTO.bno},type=${pageRequestDTO.type},keyword=${pageRequestDTO.keyword})}" >Modify</a>
