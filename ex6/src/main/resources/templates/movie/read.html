@@ -55,11 +55,17 @@
         <!-- 영화포스터가 있는 경우 출력해주는 부분 -->
         <div class="uploadResult">
             <ul>
-                <li th:if="${movieDTO.imageDTOList.size()>0 && movieDTO.imageDTOList[0].path != null}"
-                    th:each="movieImageDTO : ${movieDTO.imageDTOList}" th:data-file="${movieImageDTO.getThumbnailURL}"
+                <li th:if="${movieDTO.imageDTOList.size()>0}"
+                    th:each="movieImageDTO : ${movieDTO.imageDTOList}"
+                    th:data-file="${movieImageDTO.getImageURL}"
+                    th:onclick="viewPicture([[${movieImageDTO.getImageURL}]])"
                     style="cursor:pointer;">
-                    <img th:if="${movieImageDTO.path != null}"
-                         th:src="|@{/display(fileName=${movieImageDTO.getThumbnailURL})}|">
+                    <span th:if="${movieImageDTO.path != null}"><img
+                            th:src="|@{/display(fileName=${movieImageDTO.getThumbnailURL})}|"
+                            alt="poster"></span>
+                    <span th:if="${movieImageDTO.path == null}"><img
+                            src="https://placehold.co/70x100/lightblue/white?text=no+image\npath"
+                            alt="poster"></span>
                 </li>
             </ul>
         </div>
@@ -95,16 +101,17 @@
             // 다큐먼트 읽고 난 뒤 실행되는 스크립트
             window.onload = () => {
                 var msg = [[${ msg }]] // 수정후 넘어오는 수정메시지
+                loadReviewJSON() // 리뷰을 REST하게 불러오는 함수 호출
+                if(msg === '' || history.state) return// 모달창 안띄우는 코드
                 if (msg) {
                     // 수정후 변경사항을 위한 모달 인스턴스 생성
                     const myModal = new bootstrap.Modal(document.querySelector('#myModal'), { backdrop: true });
                     document.querySelector(".modal-body").innerHTML = `<p>${msg}되었습니다.</p>`
                     document.querySelector("#exampleModalLabel")
-                        .innerHTML = `<p>${msg.split(" ")[2]}창</p>`
+                    .innerHTML = `<p>${msg.split(" ")[2]}창</p>`
                     myModal.show()
-                    history.replaceState({}, null, null)
                 }
-                loadReviewJSON() // 리뷰을 REST하게 불러오는 함수 호출
+                history.replaceState({}, null, null)
             }
 
             // 리뷰목록을 불러오는 함수
@@ -173,8 +180,6 @@
 
             // 리뷰 저장 모달 창 띄우기
             function addReview() {
-                // 리뷰 추가하기 위한 모달 인스턴스 생성
-                const myModal = new bootstrap.Modal(document.querySelector('#myModal'), { backdrop: true });
                 // 모달 창 제목
                 document.querySelector("#exampleModalLabel").textContent = "Review 추가하기"
                 // 모달 바디
@@ -194,6 +199,8 @@
                     <button type="button" class="btn btn-primary save" onclick="saveReview()">등록</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
                 `
+                // 리뷰 추가하기 위한 모달 인스턴스 생성
+                const myModal = new bootstrap.Modal(document.querySelector('#myModal'), { backdrop: true });
                 myModal.show() // 모달 인스턴스를 실제 보여주는 함수
             }
 
@@ -333,6 +340,15 @@
                     })
             }
 
+            // 원본 이미지 보기
+            function viewPicture(file) {
+                const myModal = new bootstrap.Modal(document.querySelector('#myModal'), { backdrop: true });
+                const url = /*[[@{/display}]]*/'url'
+                document.querySelector(".modal-title").innerHTML = `<p>원본 이미지</p>`
+                document.querySelector(".modal-body").innerHTML =
+                `<img style='width: 100%' src='${url}?fileName=${file}'>`
+                myModal.show();
+            }
         </script>
     </th:block>
 </th:block>

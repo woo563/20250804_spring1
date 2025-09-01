@@ -5,8 +5,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class UploadTestController {
-  @GetMapping("/testUpload")
-  public void testUpload() {
+    @GetMapping("/testUpload")
+    public void testUpload() {
 
-  }
+    }
 }

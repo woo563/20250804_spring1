@@ -23,7 +23,7 @@
         <form th:action="@{/movie/modify}" method="post" id="frmModify">
             <div class="form-group">
                 <label for="mno">Mno</label>
-                <input type="text" id="mno" class="form-control" readonly th:value="${movieDTO.mno}">
+                <input type="text" name="mno" id="mno" class="form-control" readonly th:value="${movieDTO.mno}">
             </div>
             <div class="form-group">
                 <label for="title">Title</label>
@@ -66,15 +66,19 @@
         <!-- 영화포스터가 있는 경우 출력해주는 부분 -->
         <div class="uploadResult">
             <ul>
-                <li th:if="${movieDTO.imageDTOList.size()>0 && movieDTO.imageDTOList[0].path != null}"
+                <li th:if="${movieDTO.imageDTOList.size()>0}"
                     th:each="movieImageDTO : ${movieDTO.imageDTOList}" th:data-path='${movieImageDTO.path}'
                     th:data-uuid='${movieImageDTO.uuid}' th:data-file='${movieImageDTO.getImageURL}'
                     th:data-name='${movieImageDTO.imgName}' style="cursor:pointer;">
                     <div>
                         <button type="button" th:onclick="javascript:this.closest('li').remove()">X
                         </button>
-                        <img th:if="${movieImageDTO.path != null}"
-                             th:src="|@{/display(fileName=${movieImageDTO.getThumbnailURL})}|">
+                        <span th:if="${movieImageDTO.path != null}"><img
+                                th:src="|@{/display(fileName=${movieImageDTO.getThumbnailURL})}|"
+                                alt="poster"></span>
+                        <span th:if="${movieImageDTO.path == null}"><img
+                                src="https://placehold.co/70x100/lightblue/white?text=no+image\npath"
+                                alt="poster"></span>
                     </div>
                 </li>
             </ul>
@@ -104,10 +108,12 @@
             frmModify = document.querySelector("#frmModify")
             btnModify.onclick = function(e) {
                 e.preventDefault();
+                // title 유효성검사
                 if (!title.value) {
                     title.setAttribute('placeholder', "제목을 입력해주세요")
                     title.focus(); return false;
                 }
+                // uploadResult에 있는 내용을 box에 hidden으로 옮기는 코드
                 let str = ''
                 const liArr = document.querySelectorAll(".uploadResult ul li")
                 for (let i = 0; i < liArr.length; i++) {
@@ -118,11 +124,12 @@
                     `
                 }
                 document.querySelector(".box").innerHTML = str
-                frmModify.submit();
+                frmModify.submit(); // btnModify를 눌러서 /movie/modify로 전송
             }
             btnDelete.onclick = e => {
                 e.preventDefault();
                 frmModify.setAttribute('action', /*[[@{/movie/remove}]]*/'remove')
+
                 frmModify.submit();
             }
             btnBack.onclick = e => {
@@ -185,21 +192,7 @@
                 // 모든 닫기버튼 불러와서 이베튼 처리함.
                 for(let i=0;i<removeBtns.length;i++){
                   removeBtns[i].onclick = function() {
-                    this.closest('li').remove(); // 화면상에서 삭제
-                    // // 실제 파일을 지우는 역할인데 여기서 사용안함=>백엔드에서 비교하면 처리할 예정
-                    // const removeUrl = /*[[@{/removeFile?fileName=}]]*/'removeUrl'
-                    // const fileName = targetLi.dataset.file;
-                    // fetch(removeUrl+fileName, {
-                    //   method: 'POST', dataType: 'json', fileName: fileName
-                    // })
-                    // .then(response => response.json())
-                    // .then(json => {
-                    //   console.log(json)
-                    //   if(json === true) targetLi.remove()
-                    //   document.querySelector("#custom-label").innerHTML = ''
-                    //   document.querySelector("#fileInput").value = '';
-                    // })
-                    // .catch(err => console.log("Error occurred: ", err))
+                    this.closest('li').remove(); // 화면상에서만 삭제
                   }
                 }
             }
