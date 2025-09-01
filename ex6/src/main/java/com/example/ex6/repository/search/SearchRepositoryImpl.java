@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 // 목적 : Q 도메인을 활용한 동적검색을 할 수 있다.
 @Log4j2
 public class SearchRepositoryImpl extends QuerydslRepositorySupport
-    implements SearchRepository {
+        implements SearchRepository {
 
   public SearchRepositoryImpl() {
     super(Movie.class);
@@ -45,7 +45,7 @@ public class SearchRepositoryImpl extends QuerydslRepositorySupport
     jpqlQuery.leftJoin(qMember).on(qReview.member.eq(qMember));
 
     JPQLQuery<Tuple> tuple = jpqlQuery.select(
-        qMovie, qMovieImage, qReview.grade.avg().coalesce(0.0) ,qReview.count()
+            qMovie, qMovieImage, qReview.grade.avg().coalesce(0.0) ,qReview.count()
     );
 
     tuple.groupBy(qMovie);
@@ -75,7 +75,7 @@ public class SearchRepositoryImpl extends QuerydslRepositorySupport
 
     // 3) Tuple 생성:조인한 객체와 select를 활용해서 필요한 데이터를 tuple로 생성
     JPQLQuery<Tuple> tuple = jpqlQuery.select(
-        qMovie, qMovieImage, qReview.grade.avg().coalesce(0.0) ,qReview.count()
+            qMovie, qMovieImage, qReview.grade.avg().coalesce(0.0) ,qReview.count()
     );
 
     // 4) 조건절 검색을 위한 객체 생성

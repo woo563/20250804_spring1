@@ -1,6 +1,8 @@
 package com.example.ex6.controller;
 
 import com.example.ex6.dto.UploadResultDTO;
+import com.example.ex6.service.MovieService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import net.coobird.thumbnailator.Thumbnailator;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +31,9 @@ import java.util.UUID;
 
 @RestController
 @Log4j2
+@RequiredArgsConstructor
 public class UploadController {
+  private final MovieService movieService;
 
   @RequestMapping("/uploadAjax")
   public ResponseEntity<List<UploadResultDTO>> uploadFile(MultipartFile[] uploadFiles) {
@@ -53,13 +57,13 @@ public class UploadController {
 
       // 서버에 실제 저장될 경로와 파일명 전체를 담은 변수 선언
       String saveName = uploadPath + File.separator + folderPath
-          + File.separator + uuid + "_" + fileName;
+              + File.separator + uuid + "_" + fileName;
       Path savePath = Paths.get(saveName);
 
       try {
         uploadFile.transferTo(savePath);
         String thumbnailSaveName = uploadPath + File.separator + folderPath
-            + File.separator + "s_" + uuid + "_" + fileName;
+                + File.separator + "s_" + uuid + "_" + fileName;
         File thumbnailFile = new File(thumbnailSaveName);
         Thumbnailator.createThumbnail(savePath.toFile(), thumbnailFile, 100, 100);
         resultDTOList.add(new UploadResultDTO(fileName, uuid, folderPath));
@@ -71,11 +75,16 @@ public class UploadController {
   }
 
   @GetMapping("/display")
-  public ResponseEntity<byte[]> getFile(String fileName) {
+  public ResponseEntity<byte[]> getFile(String fileName, String size) {
     ResponseEntity<byte[]> result = null;
     try {
       String srcFileName = URLDecoder.decode(fileName, "UTF-8");
       File file = new File(uploadPath + File.separator + srcFileName);
+      if (size != null && size.equals("1")) {
+        log.info(">>", file.getName());
+        // 미리보기 할 때 링크에 size=1로 설정하여 섬네일명에서 s_ 를 제거하고 가져옴
+        file = new File(file.getParent(), file.getName().substring(2));
+      }
       HttpHeaders headers = new HttpHeaders(); //브라우저에 전송할때 Header 필요
       headers.add("Content-Type", Files.probeContentType(file.toPath())); // 파일 타입 설정
       result = new ResponseEntity<>(FileCopyUtils.copyToByteArray(file), headers, HttpStatus.OK);
@@ -87,9 +96,12 @@ public class UploadController {
   }
 
   @PostMapping("/removeFile")
-  public ResponseEntity<Boolean> removeFile(String fileName) {
+  public ResponseEntity<Boolean> removeFile(String fileName, String uuid) {
     log.info(">>>"+fileName);
     String srcFileName = null;
+
+    if (uuid != null) movieService.removeMovieImagebyUUID(uuid);
+
     try {
       srcFileName = URLDecoder.decode(fileName, "UTF-8"); //정확한 소스파일명
       File file = new File(uploadPath+File.separator+srcFileName);//해당되는 파일선택
@@ -97,7 +109,7 @@ public class UploadController {
       File thumbnail = new File(file.getParent(), "s_" + file.getName());
       result = thumbnail.delete() && result; // 두번째 썸내일 파일 지움
       return new ResponseEntity<>(result,
-          result ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
+              result ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
     } catch (UnsupportedEncodingException e) {
       throw new RuntimeException(e);
     }

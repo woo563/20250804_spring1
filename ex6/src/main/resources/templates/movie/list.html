@@ -18,7 +18,7 @@
           </select>
         </div>
         <input type="text" class="form-control" name="keyword" id="keyword" style="border-radius: 5px;"
-          th:value="${pageRequestDTO.keyword}">
+               th:value="${pageRequestDTO.keyword}">
         <div class="input-group-append" style="margin-left:10px;">
           <button class="btn btn-outline-primary btnSrch">검색</button>
         </div>
@@ -26,27 +26,27 @@
     </form>
     <table class="table table-striped">
       <thead>
-        <tr>
-          <th>Mno</th>
-          <th>Title & Picture</th>
-          <th>Review Count</th>
-          <th>AVG Rating</th>
-          <th>Register Date</th>
-        </tr>
+      <tr>
+        <th>Mno</th>
+        <th>Title & Picture</th>
+        <th>AVG Rating</th>
+        <th>Review Count</th>
+        <th>Register Date</th>
+      </tr>
       </thead>
       <tbody>
-        <tr th:each="movieDTO : ${pageResultDTO.dtoList}" style="cursor:pointer"
-          onmouseover="this.style.background='#dbdbdb'" onmouseout="this.style.background='white'" 
+      <tr th:each="movieDTO : ${pageResultDTO.dtoList}" style="cursor:pointer"
+          onmouseover="this.style.background='#dbdbdb'" onmouseout="this.style.background='white'"
           th:onclick="goRead([[${movieDTO.mno}]],[[${pageResultDTO.page}]],
           [[${pageRequestDTO.type}]],[[${pageRequestDTO.keyword}]])">
-          <th scope="row">[[${movieDTO.mno}]]</th>
-          <td><img th:if="${movieDTO.imageDTOList.size()>0 && movieDTO.imageDTOList[0].path != null}"
-              th:src="|@{/display(fileName=${movieDTO.imageDTOList[0].getThumbnailURL()})}|"
-              alt="poster">[[${movieDTO.title}]]</td>
-          <td><b>[[${movieDTO.avg}]]</b></td>
-          <td><b>[[${movieDTO.reviewCnt}]]</b></td>
-          <td>[[${#temporals.format(movieDTO.regDate, 'yyyy/MM/dd hh:mm')}]]</td>
-        </tr>
+        <th scope="row">[[${movieDTO.mno}]]</th>
+        <td><img th:if="${movieDTO.imageDTOList.size()>0 && movieDTO.imageDTOList[0].path != null}"
+                 th:src="|@{/display(fileName=${movieDTO.imageDTOList[0].getThumbnailURL()})}|"
+                 alt="poster">[[${movieDTO.title}]]</td>
+        <td><b>[[${movieDTO.avg}]]</b></td>
+        <td><b>[[${movieDTO.reviewCnt}]]</b></td>
+        <td>[[${#temporals.format(movieDTO.regDate, 'yyyy/MM/dd hh:mm')}]]</td>
+      </tr>
       </tbody>
     </table>
     <ul class="pagination h-100 justify-content-center align-items-center">
@@ -83,13 +83,14 @@
       window.onload = () => {
         let msg = [[${ msg }]]
         // msg의 내용이 있을 때만 모달창 띄워짐
+        if(msg === '' || history.state) return// 모달창 안띄우는 코드
         if (msg) {
           const myModal = new bootstrap.Modal(document.querySelector('#myModal'), { backdrop: true });
           document.querySelector(".modal-title").innerHTML = `<p>알림</p>`
-          document.querySelector(".modal-body").textContent = [[${ msg }]]
+          document.querySelector(".modal-body").textContent = `<p>[[${ msg }]] 되었습니다.</p>`
           myModal.show()
-          history.replaceState({}, null, null) // 모달창 띄운 흔적을 history에서 제거
         }
+        history.replaceState({}, null, null) // 모달창 띄운 흔적을 history에서 제거
         const frmSrch = document.querySelector('#frmSrch')
         const btnSrch = document.querySelector('.btnSrch')
         const type = document.querySelector('#type')

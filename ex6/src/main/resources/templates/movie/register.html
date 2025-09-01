@@ -42,7 +42,8 @@
                 <input type="file" class="custom-file-input files form-control files" id="fileInput" multiple />
                 <label id="upload-caption"></label>
             </div>
-            <div class="box" style="border: 1px solid black;">box</div>
+            <!-- box:: modify를 submit 할 때 uploadResult의 정보를 form 안에 hidden 으로 재구성 -->
+            <div class="box">box</div>
             <div class="form-group">
                 <button type="submit" class="btn btn-primary btn-register">Submit</button>
             </div>
@@ -66,7 +67,7 @@
                 e.preventDefault();
                 if (!title.value) {
                     title.setAttribute('placeholder', "제목을 입력해주세요")
-                    title.focus(); return;
+                    title.focus(); return false;
                 }
                 let str = ''
                 const liArr = document.querySelectorAll(".uploadResult ul li")

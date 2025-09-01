@@ -12,15 +12,15 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
   // 2개(Movie와 Review) 조인해서 평점과 갯수만 출력
   @Query("select m, avg(coalesce(r.grade,0)), count(distinct r) " +
-      "from Movie m left outer join Review r " +
-      "on r.movie = m group by m ")
+          "from Movie m left outer join Review r " +
+          "on r.movie = m group by m ")
   Page<Object[]> getListPage(Pageable pageable);
 
   // 3개(Movie, Review, MovieImage) 조인해서 평점, 갯수, mi 첫번째 등록된 test0.jpg만 출력
   @Query("select m, mi, avg(coalesce(r.grade,0)), count(distinct r) " +
-      "from Movie m left outer join Review r on r.movie = m " +
-      "left outer join MovieImage mi on mi.movie = m  " +
-      "group by m ")
+          "from Movie m left outer join Review r on r.movie = m " +
+          "left outer join MovieImage mi on mi.movie = m  " +
+          "group by m ")
   Page<Object[]> getListPageMi(Pageable pageable);
 
   // 3개(Movie, Review, MovieImage) 조인해서 평점, 갯수, imgName의 max값 출력(Image정보는 못가져옴)
@@ -33,10 +33,10 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
   // 3개(Movie, Review, MovieImage) 조인해서 평점, 갯수, 가장최근 등록된 MovieImage 정보1개
   @Query("select m, mi, avg(coalesce(r.grade,0)), count(distinct r) from Movie m " +
-      "left outer join MovieImage mi on mi.movie = m " +
-      "left outer join Review     r  on r.movie  = m " +
-      "where inum = (select max(mi2.inum) from MovieImage mi2 where mi2.movie=m) " +
-      "group by m ")
+          "left outer join MovieImage mi on mi.movie = m " +
+          "left outer join Review     r  on r.movie  = m " +
+          "where inum = (select max(mi2.inum) from MovieImage mi2 where mi2.movie=m) " +
+          "group by m ")
   Page<Object[]> getListPageMaxMi(Pageable pageable);
 
 
@@ -48,9 +48,9 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
   // Movie에 대한 정보(Movie, MovieImage 전부, 평점, 댓글 갯수)
   @Query("select m, mi, avg(coalesce(r.grade,0)), count(r) " +
-      "from Movie m left outer join MovieImage mi on mi.movie = m  " +
-      "left outer join Review r on r.movie = m " +
-      "where m.mno=:mno group by mi ")
+          "from Movie m left outer join MovieImage mi on mi.movie = m  " +
+          "left outer join Review r on r.movie = m " +
+          "where m.mno=:mno group by mi ")
   List<Object[]> getMovieWithAll(Long mno);
 
 }

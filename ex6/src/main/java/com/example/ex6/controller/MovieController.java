@@ -17,22 +17,53 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Log4j2
 @RequiredArgsConstructor
 public class MovieController {
-  private final MovieService movieService;
+    private final MovieService movieService;
 
-  @GetMapping("register")
-  public void register(){}
+    @GetMapping("register")
+    public void register(){}
 
-  @PostMapping("/register")
-  public String register(MovieDTO movieDTO, RedirectAttributes ra) {
-    Long mno = movieService.register(movieDTO);
-    ra.addFlashAttribute("msg", mno);
-    return "redirect:/movie/list";
-  }
+    @PostMapping("/register")
+    public String register(MovieDTO movieDTO, RedirectAttributes ra) {
+        Long mno = movieService.register(movieDTO);
+        ra.addFlashAttribute("msg", mno);
+        return "redirect:/movie/list";
+    }
 
-  @GetMapping({"", "/", "/list"})
-  public String list(PageRequestDTO pageRequestDTO, Model model) {
-    model.addAttribute("pageResultDTO", movieService.getList(pageRequestDTO));
-    return "/movie/list";
-  }
+    @GetMapping({"", "/", "/list"})
+    public String list(PageRequestDTO pageRequestDTO, Model model) {
+        model.addAttribute("pageResultDTO", movieService.getList(pageRequestDTO));
+        return "/movie/list";
+    }
 
+    @GetMapping({"/read", "/modify"})
+    public void get(Long mno, PageRequestDTO pageRequestDTO, Model model) {
+        model.addAttribute("movieDTO", movieService.get(mno));
+    }
+
+    @PostMapping("/modify")
+    public String modify(MovieDTO movieDTO, RedirectAttributes ra, PageRequestDTO pageRequestDTO) {
+        log.info("modify.... movieDTO:" + movieDTO); //movieDTO에는 mno, title, imageDTOList 가 넘어옴
+        movieService.modify(movieDTO); // service 이동
+        ra.addFlashAttribute("msg", movieDTO.getMno() + " 수정");
+        ra.addAttribute("mno", movieDTO.getMno());
+        ra.addAttribute("page", pageRequestDTO.getPage());
+        ra.addAttribute("type", pageRequestDTO.getType());
+        ra.addAttribute("keyword", pageRequestDTO.getKeyword());
+        return "redirect:/movie/read";
+    }
+
+    @PostMapping("/remove")
+    public String remove(Long mno, RedirectAttributes ra, PageRequestDTO pageRequestDTO){
+        log.info("remove post... mno: " + mno);
+        movieService.removeWithReviewsAndMovieImages(mno);
+
+        if(movieService.getList(pageRequestDTO).getDtoList().size() == 0 && pageRequestDTO.getPage() != 1) {
+            pageRequestDTO.setPage(pageRequestDTO.getPage()-1);
+        }
+        ra.addFlashAttribute("msg", mno + " 삭제");
+        ra.addAttribute("page", pageRequestDTO.getPage());
+        ra.addAttribute("type", pageRequestDTO.getType());
+        ra.addAttribute("keyword", pageRequestDTO.getKeyword());
+        return "redirect:/movie/list";
+    }
 }
